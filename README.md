@@ -160,7 +160,7 @@ Based on the pattern described in [this implementation](https://medium.com/@kuna
 
 ## Author
 
-**Kunal Bhardwaj** — Drone systems engineer working on autonomous flight software.
+**Kunal Bhardwaj** — Systems engineer working on autonomous drones and AI-powered developer tools. Building at the intersection of embedded systems and LLM workflows.
 
 - Blog: [medium.com/@kunalbhardwaj](https://medium.com/@kunalbhardwaj)
 - LinkedIn: [linkedin.com/in/kunalbhardwaj](https://linkedin.com/in/kunalbhardwaj)
