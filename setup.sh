@@ -2,11 +2,12 @@
 set -euo pipefail
 
 # Claude Coworker Model — Setup Script
-# Creates venv, installs deps, symlinks tools to ~/bin/
+# Creates venv, installs deps, copies tools to ~/.local/bin/ with correct shebang
 
 INSTALL_DIR="${HOME}/.local/share/claude-coworker"
 BIN_DIR="${HOME}/.local/bin"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV_PYTHON="${INSTALL_DIR}/venv/bin/python3"
 
 echo "=== Claude Coworker Model Setup ==="
 echo ""
@@ -22,14 +23,22 @@ echo "[2/4] Installing dependencies..."
 pip install --quiet --upgrade pip
 pip install --quiet -r "${SCRIPT_DIR}/requirements.txt"
 
-# 3. Symlink tools
-echo "[3/4] Linking tools to ${BIN_DIR}..."
+# 3. Install tools with correct shebang pointing to venv Python
+echo "[3/4] Installing tools to ${BIN_DIR}..."
 mkdir -p "${BIN_DIR}"
-for tool in ask-kimi kimi-write extract-chat; do
-    chmod +x "${SCRIPT_DIR}/tools/${tool}"
-    ln -sf "${SCRIPT_DIR}/tools/${tool}" "${BIN_DIR}/${tool}"
-    echo "  ✓ ${tool}"
+
+# ask-kimi and kimi-write need the venv (openai package)
+for tool in ask-kimi kimi-write; do
+    sed "1s|#!/usr/bin/env python3|#!${VENV_PYTHON}|" \
+        "${SCRIPT_DIR}/tools/${tool}" > "${BIN_DIR}/${tool}"
+    chmod +x "${BIN_DIR}/${tool}"
+    echo "  ✓ ${tool} (using venv python)"
 done
+
+# extract-chat uses only stdlib — symlink is fine
+chmod +x "${SCRIPT_DIR}/tools/extract-chat"
+ln -sf "${SCRIPT_DIR}/tools/extract-chat" "${BIN_DIR}/extract-chat"
+echo "  ✓ extract-chat (stdlib only)"
 
 # 4. Check API key
 echo "[4/4] Checking environment..."

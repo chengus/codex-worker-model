@@ -152,8 +152,8 @@ Add `CLAUDE.md` to your repository so Claude Code loads it automatically on star
 | Metric | Before | After |
 |--------|--------|-------|
 | Claude Pro weekly limit | Hit by Wednesday | Never hit |
-| Avg. session cost | $0.00 (Pro limit) | $0.02 worker + $0.05 Claude |
-| 3-week total spend | $20 (Pro overages) | $0.38 worker API |
+| Token usage per session | 80%+ on file reading | 20% (summaries only) |
+| 3-week worker API cost | — | $0.38 total |
 | Context window usage | 80% reading files | 20% reading summaries |
 
 Based on the pattern described in [this implementation](https://medium.com/@kunalbhardwaj) (567K views Reddit, 7.2K Medium).
@@ -168,7 +168,5 @@ Based on the pattern described in [this implementation](https://medium.com/@kuna
 ## Contributing
 
 PRs welcome. Focus areas: additional provider templates, token usage optimization, and extracting structured data from more session formats.
-
-Run tests with `pytest tests/`. Lint with `ruff check .`.
 
 MIT License. See [LICENSE](LICENSE).
