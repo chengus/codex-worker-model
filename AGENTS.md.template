@@ -2,6 +2,9 @@
 
 Three CLI tools delegate bulk I/O to a worker model. Use them to save tokens.
 
+### Complete context
+Use these tools whenever they help build a complete picture. Ask the worker to inspect as many relevant files, transcripts, docs, or logs as needed before making changes, then use the worker's summary as supporting context for your own judgment.
+
 ### ask-worker - bulk reading
 For reading files >400 lines, or when you'd otherwise read 3+ files:
 
