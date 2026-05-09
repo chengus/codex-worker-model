@@ -1,5 +1,7 @@
 # Codex Worker Model
 
+Credit: adapted from Kunal Bhardwaj's original `imkunal007219/claude-coworker-model` project.
+
 Offload bulk I/O from Codex to an inexpensive worker model. The worker reads large files, drafts repetitive code, and extracts transcript context while Codex stays focused on planning, review, and final edits.
 
 This local setup defaults to DeepSeek V4 Flash through DeepSeek's OpenAI-compatible API.
@@ -7,8 +9,8 @@ This local setup defaults to DeepSeek V4 Flash through DeepSeek's OpenAI-compati
 ## Quick Start
 
 ```bash
-git clone https://github.com/imkunal007219/claude-coworker-model.git
-cd claude-coworker-model
+git clone https://github.com/chengus/codex-worker-model.git
+cd codex-worker-model
 ./setup.sh
 
 export WORKER_API_KEY="$DEEPSEEK_API_KEY"
@@ -36,11 +38,43 @@ source .env.example
 
 Set `DEEPSEEK_API_KEY` or replace `WORKER_API_KEY` with your DeepSeek API key first.
 
+For global Codex usage, store these values in:
+
+```bash
+~/.codex/worker-model.env
+```
+
+Example:
+
+```bash
+export WORKER_API_KEY="your-deepseek-key"
+export WORKER_BASE_URL="https://api.deepseek.com"
+export WORKER_MODEL="deepseek-v4-flash"
+```
+
+`ask-worker` and `worker-write` automatically load `~/.codex/worker-model.env`, then `.env` from the current project if present.
+
 ## Codex Setup
 
 This repo includes `AGENTS.md` and `AGENTS.md.template`.
 
 For another Codex project, copy `AGENTS.md.template` into that project as `AGENTS.md`. Codex reads `AGENTS.md` automatically and can use the worker-routing rules there.
+
+For all Codex chats, copy the global instructions into Codex's home config:
+
+```bash
+cp AGENTS.md ~/.codex/AGENTS.md
+```
+
+To avoid repeated approval prompts for the worker commands, add these prefix rules to `~/.codex/rules/default.rules`:
+
+```text
+prefix_rule(pattern=["ask-worker"], decision="allow")
+prefix_rule(pattern=["worker-write"], decision="allow")
+prefix_rule(pattern=["extract-chat"], decision="allow")
+```
+
+The worker tools call DeepSeek over the network. Codex may still need network/escalated execution when the sandbox blocks outbound access; the global `AGENTS.md` tells Codex to rerun the same worker command with network approval in that case.
 
 ## Tools
 
