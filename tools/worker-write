@@ -5,7 +5,7 @@ DeepSeek V4 Flash can use reasoning tokens internally.
 max-tokens must be high enough to cover both reasoning + output code.
 """
 import argparse, os, sys, pathlib
-from openai import OpenAI
+from openai import APIConnectionError, OpenAI
 
 
 def load_env_file(path):
@@ -58,18 +58,26 @@ ctx = ""
 if args.context:
     ctx = f"<reference>\n{pathlib.Path(args.context).read_text()}\n</reference>\n"
 
-resp = client.chat.completions.create(
-    model=args.model,
-    messages=[
-        {"role": "system", "content": (
-            "Generate clean, idiomatic code matching the style of any "
-            "reference provided. No explanations, no markdown fences - "
-            "output ONLY the file contents."
-        )},
-        {"role": "user", "content": f"{ctx}Write: {args.spec}"},
-    ],
-    max_tokens=args.max_tokens,
-)
+try:
+    resp = client.chat.completions.create(
+        model=args.model,
+        messages=[
+            {"role": "system", "content": (
+                "Generate clean, idiomatic code matching the style of any "
+                "reference provided. No explanations, no markdown fences - "
+                "output ONLY the file contents."
+            )},
+            {"role": "user", "content": f"{ctx}Write: {args.spec}"},
+        ],
+        max_tokens=args.max_tokens,
+    )
+except APIConnectionError:
+    print(
+        "[ERROR: Could not reach the worker API. In Codex, rerun this command "
+        "with network approval/escalated permissions, or check WORKER_BASE_URL.]",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 content = resp.choices[0].message.content
 if not content:

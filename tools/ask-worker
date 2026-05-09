@@ -5,7 +5,7 @@ DeepSeek V4 Flash can use reasoning tokens internally.
 max-tokens must be high enough to cover both reasoning + answer.
 """
 import argparse, os, sys, pathlib
-from openai import OpenAI
+from openai import APIConnectionError, OpenAI
 
 
 def load_env_file(path):
@@ -60,20 +60,28 @@ for path in args.paths:
     docs.append(f"<file path='{path}'>\n{content}\n</file>")
 corpus = "\n\n".join(docs)
 
-resp = client.chat.completions.create(
-    model=args.model,
-    messages=[
-        {"role": "system", "content": (
-            "You are a precise code/document analyst. Read the provided files "
-            "and answer the question concisely. Quote file paths and line "
-            "numbers when relevant. Output structured bullets, not prose. "
-            "Keep your answer under 800 words."
-        )},
-        {"role": "user", "content": f"<corpus>\n{corpus}\n</corpus>"},
-        {"role": "user", "content": args.question},
-    ],
-    max_tokens=args.max_tokens,
-)
+try:
+    resp = client.chat.completions.create(
+        model=args.model,
+        messages=[
+            {"role": "system", "content": (
+                "You are a precise code/document analyst. Read the provided files "
+                "and answer the question concisely. Quote file paths and line "
+                "numbers when relevant. Output structured bullets, not prose. "
+                "Keep your answer under 800 words."
+            )},
+            {"role": "user", "content": f"<corpus>\n{corpus}\n</corpus>"},
+            {"role": "user", "content": args.question},
+        ],
+        max_tokens=args.max_tokens,
+    )
+except APIConnectionError:
+    print(
+        "[ERROR: Could not reach the worker API. In Codex, rerun this command "
+        "with network approval/escalated permissions, or check WORKER_BASE_URL.]",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 answer = resp.choices[0].message.content
 if answer:
