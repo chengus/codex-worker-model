@@ -1,14 +1,29 @@
 ## Worker Delegation Tools for Codex
 
-Three CLI tools delegate bulk I/O to a worker model. Use them to save tokens.
+Use worker tools to save context on large, repetitive, or exploratory tasks. Worker output is supporting context only; Codex remains responsible for final reasoning, edits, and verification.
 
-### Complete context
-Use these tools whenever they help build a complete picture. Ask the worker to inspect as many relevant files, transcripts, docs, or logs as needed before making changes, then use the worker's summary as supporting context for your own judgment.
+### Use ask-worker for reading
+Use `ask-worker` when the task needs a broad or long-context read, including:
+- Files over ~400 lines
+- 3+ files that need summarizing or comparison
+- Documentation, logs, transcripts, generated files, or unfamiliar repo mapping
+- "Get the complete picture" tasks before planning changes
+
+Ask focused questions and include all relevant paths. Prefer worker summaries before reading large files directly, then read exact files/lines yourself before editing.
+
+### Use worker-write for boilerplate
+Use `worker-write` for low-risk repetitive output, including:
+- Test scaffolds
+- Config examples
+- Documentation drafts
+- Simple wrappers, adapters, fixtures, or generated patterns
+
+Always review and edit the result before treating it as final.
 
 ### Network access
 The worker tools call the configured model API over the network. In Codex, run them with network approval/escalated permissions when the sandbox blocks outbound access. If a worker command reports that it cannot reach the API, rerun the same command with network approval before falling back.
 
-### ask-worker - bulk reading
+### ask-worker command
 For reading files >400 lines, or when you'd otherwise read 3+ files:
 
 ```bash
@@ -18,7 +33,7 @@ ask-worker --paths <file1> <file2>... --question "<specific question>"
 Returns a structured summary. Use that instead of reading files yourself.
 Only read files directly when you need to make edits to specific lines.
 
-### worker-write - boilerplate generation
+### worker-write command
 For generating tests, config files, docstrings, or repetitive code patterns:
 
 ```bash
@@ -42,8 +57,10 @@ extract-chat <session.jsonl> -o /tmp/chat.txt
    `ask-worker --paths /tmp/chat.txt <doc-files> --question "read chat, give exact changes for docs"`
 3. Apply the worker's changes via Edit tool
 
-### When NOT to delegate
-- Tasks under ~2000 tokens of work (delegation overhead isn't worth it)
-- Architectural decisions, debugging, safety-critical code
-- Anything requiring careful reasoning
-- When exact line numbers are needed for editing
+### Do not delegate
+Do not use worker tools for:
+- Architecture decisions
+- Debugging complex behavior
+- Security-sensitive or destructive changes
+- Exact line-level edits
+- Final validation or test interpretation
