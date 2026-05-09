@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Extract human-readable chat from Claude Code JSONL transcripts.
+"""Extract human-readable chat from Codex JSONL transcripts.
 
 Usage:
   extract-chat <session.jsonl>                    # print to stdout
   extract-chat <session.jsonl> -o chat.txt        # write to file
-  extract-chat <session.jsonl> | ask-kimi ...     # pipe to kimi
+  extract-chat <session.jsonl> | ask-worker ...   # pipe to worker
 
 Extracts only user and assistant TEXT messages. Strips:
   - Tool calls, tool results, system prompts
@@ -57,7 +57,7 @@ def extract(jsonl_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract chat from Claude Code JSONL")
+    parser = argparse.ArgumentParser(description="Extract chat from Codex JSONL")
     parser.add_argument("jsonl", help="Path to .jsonl transcript")
     parser.add_argument("-o", "--output", help="Output file (default: stdout)")
     args = parser.parse_args()

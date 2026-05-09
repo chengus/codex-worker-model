@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Claude Coworker Model — Setup Script
+# Codex Worker Model - Setup Script
 # Creates venv, installs deps, copies tools to ~/.local/bin/ with correct shebang
 
 INSTALL_DIR="${HOME}/.local/share/claude-coworker"
@@ -9,7 +9,7 @@ BIN_DIR="${HOME}/.local/bin"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_PYTHON="${INSTALL_DIR}/venv/bin/python3"
 
-echo "=== Claude Coworker Model Setup ==="
+echo "=== Codex Worker Model Setup ==="
 echo ""
 
 # 1. Create venv
@@ -27,38 +27,33 @@ pip install --quiet -r "${SCRIPT_DIR}/requirements.txt"
 echo "[3/4] Installing tools to ${BIN_DIR}..."
 mkdir -p "${BIN_DIR}"
 
-# ask-kimi and kimi-write need the venv (openai package)
-for tool in ask-kimi kimi-write; do
+# ask-worker and worker-write need the venv (openai package)
+for tool in ask-worker worker-write; do
     sed "1s|#!/usr/bin/env python3|#!${VENV_PYTHON}|" \
         "${SCRIPT_DIR}/tools/${tool}" > "${BIN_DIR}/${tool}"
     chmod +x "${BIN_DIR}/${tool}"
     echo "  ✓ ${tool} (using venv python)"
 done
 
-# extract-chat uses only stdlib — symlink is fine
+# extract-chat uses only stdlib - symlink is fine
 chmod +x "${SCRIPT_DIR}/tools/extract-chat"
 ln -sf "${SCRIPT_DIR}/tools/extract-chat" "${BIN_DIR}/extract-chat"
 echo "  ✓ extract-chat (stdlib only)"
 
 # 4. Check API key
 echo "[4/4] Checking environment..."
-if [ -z "${WORKER_API_KEY:-}" ] && [ -z "${MOONSHOT_API_KEY:-}" ]; then
+if [ -z "${WORKER_API_KEY:-}" ] && [ -z "${DEEPSEEK_API_KEY:-}" ]; then
     echo ""
     echo "⚠  No API key found. Set one of these in your shell profile:"
     echo ""
-    echo "  # Kimi (Moonshot AI)"
+    echo "  # DeepSeek V4 Flash"
     echo "  export WORKER_API_KEY=\"your-key-here\""
-    echo "  export WORKER_BASE_URL=\"https://api.moonshot.ai/v1\""
-    echo "  export WORKER_MODEL=\"kimi-k2.5\""
-    echo ""
-    echo "  # OR DeepSeek"
-    echo "  export WORKER_API_KEY=\"your-key-here\""
-    echo "  export WORKER_BASE_URL=\"https://api.deepseek.com/v1\""
-    echo "  export WORKER_MODEL=\"deepseek-chat\""
+    echo "  export WORKER_BASE_URL=\"https://api.deepseek.com\""
+    echo "  export WORKER_MODEL=\"deepseek-v4-flash\""
     echo ""
     echo "  # OR Ollama (local, free)"
     echo "  export WORKER_BASE_URL=\"http://localhost:11434/v1\""
-    echo "  export WORKER_MODEL=\"qwen2.5:32b\""
+    echo "  export WORKER_MODEL=\"qwen2.5-coder:14b\""
     echo ""
 else
     echo "  ✓ API key found"
@@ -68,6 +63,6 @@ echo ""
 echo "=== Done! ==="
 echo ""
 echo "Make sure ${BIN_DIR} is on your PATH, then try:"
-echo "  ask-kimi --paths some_file.py --question 'what does this do?'"
+echo "  ask-worker --paths some_file.py --question 'what does this do?'"
 echo ""
-echo "Copy CLAUDE.md.template into your project's CLAUDE.md for auto-routing."
+echo "Copy AGENTS.md.template into your project's AGENTS.md for Codex routing."
