@@ -42,7 +42,7 @@ echo "  ✓ extract-chat (stdlib only)"
 
 # 4. Check API key
 echo "[4/4] Checking environment..."
-if [ -z "${WORKER_API_KEY:-}" ] && [ -z "${DEEPSEEK_API_KEY:-}" ]; then
+if [ -z "${WORKER_API_KEY:-}" ] && [ -z "${DEEPSEEK_API_KEY:-}" ] && [ ! -f "${HOME}/.codex/worker-model.env" ]; then
     echo ""
     echo "⚠  No API key found. Set one of these in your shell profile:"
     echo ""

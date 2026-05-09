@@ -7,6 +7,30 @@ max-tokens must be high enough to cover both reasoning + output code.
 import argparse, os, sys, pathlib
 from openai import OpenAI
 
+
+def load_env_file(path):
+    env_path = pathlib.Path(path).expanduser()
+    if not env_path.exists():
+        return
+
+    for raw_line in env_path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export "):].strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = os.path.expandvars(value)
+
+
+load_env_file("~/.codex/worker-model.env")
+load_env_file(".env")
+
 p = argparse.ArgumentParser(description="Ask a worker model to generate code/docs")
 p.add_argument("--spec", required=True, help="What to write")
 p.add_argument("--context", help="Optional reference file for style/imports")
@@ -16,8 +40,17 @@ p.add_argument("--max-tokens", type=int, default=16384,
 p.add_argument("--model", default=os.environ.get("WORKER_MODEL", "deepseek-v4-flash"))
 args = p.parse_args()
 
+api_key = os.environ.get("WORKER_API_KEY", os.environ.get("DEEPSEEK_API_KEY", ""))
+if not api_key:
+    print(
+        "[ERROR: Missing worker API key. Set WORKER_API_KEY or DEEPSEEK_API_KEY, "
+        "or create ~/.codex/worker-model.env.]",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
 client = OpenAI(
-    api_key=os.environ.get("WORKER_API_KEY", os.environ.get("DEEPSEEK_API_KEY", "")),
+    api_key=api_key,
     base_url=os.environ.get("WORKER_BASE_URL", "https://api.deepseek.com"),
 )
 
